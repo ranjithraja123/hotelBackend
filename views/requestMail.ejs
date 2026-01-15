@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Booking Request</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h3 {
+            background-color: #0073e6;
+            color: #ffffff;
+            text-align: center;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        p {
+            font-size: 16px;
+            color: #333;
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+        strong {
+            color: #0073e6;
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #888;
+        }
+        .highlight {
+            color: #ff6600;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>New Booking Request</h3>
+        <p>
+            A new booking has been requested by <strong><%= email %></strong> for a stay from 
+            <span class="highlight"><%= localtimeFrom %></span> to <span class="highlight"><%= localtimeTo %></span>. 
+            The reservation includes <strong><%= adult %></strong> adults and 
+            <strong><%= children %></strong> children, requiring <strong><%= room %></strong> room(s).
+            You can contact the customer via email at <strong><%= email %></strong> or by phone at 
+            <strong><%= phno %></strong>.
+        </p>
+        <div class="footer">
+            <p>Thank you for choosing us! We will contact you shortly to confirm the booking.</p>
+        </div>
+    </div>
+</body>
+</html>
