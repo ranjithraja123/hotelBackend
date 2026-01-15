@@ -4,6 +4,10 @@ import fs from 'fs';
 import nodemailer from 'nodemailer'
 import ejs from 'ejs'
 import moment from 'moment-timezone'
+import { fileURLToPath } from "url";
+import reviewModel from "../models/review.model.js";
+import inquiryModel from "../models/inquiry.model.js";
+
 
 const addRooms = async (req, res) => {
     try {
@@ -36,6 +40,71 @@ const addRooms = async (req, res) => {
     };
 
 }
+
+
+const createInquiry = async (req, res) => {
+    try {
+        const {
+            fromDate,
+            toDate,
+            email,
+            phoneNumber,
+            adults,
+            children,
+            roomType,
+        } = req.body;
+
+        if (!fromDate || !toDate || !email || !phoneNumber || !adults || !roomType) {
+            return res.status(400).json({
+                success: false,
+                message: "All required fields must be provided",
+            });
+        }
+
+        const inquiry = await inquiryModel.create({
+            fromDate,
+            toDate,
+            email,
+            phoneNumber,
+            adults,
+            children,
+            roomType,
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Inquiry submitted successfully",
+            data: inquiry,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+}
+
+
+
+const getAllInquiries = async (req, res) => {
+  try {
+    const inquiries = await inquiryModel.find().sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: inquiries.length,
+      data: inquiries,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
 
 
 const getRooms = async (req, res) => {
@@ -76,8 +145,6 @@ const deleteRoomById = async (req, res) => {
         return res.status(400).json({ message: 'Error in deleteRoomById', error: error.message });
     }
 }
-import { fileURLToPath } from "url";
-import reviewModel from "../models/review.model.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -85,7 +152,7 @@ const requestMail = async (req, res) => {
     try {
         const { from, to, email, phno, adult, children, room } = req.body;
 
-        if(!from || !to || !email || !phno || !adult || !children || !room){
+        if (!from || !to || !email || !phno || !adult || !children || !room) {
             return res.status(400).json({ message: "Please fill all the fields" })
         }
 
@@ -106,15 +173,15 @@ const requestMail = async (req, res) => {
         const localtimeTo = moment.tz(to, "Asia/Kolkata").format("YYYY-MM-DD");
 
 
-        const templatepath = path.join(__dirname,"..","views","requestMail.ejs")
-        const htmlContent = await ejs.renderFile(templatepath,{localtimeFrom,localtimeTo,email, phno, adult, children, room})
+        const templatepath = path.join(__dirname, "..", "views", "requestMail.ejs")
+        const htmlContent = await ejs.renderFile(templatepath, { localtimeFrom, localtimeTo, email, phno, adult, children, room })
 
         // Email options
         const mailOptions = {
-            from:"ranjithraja413@gmail.com",
+            from: "ranjithraja413@gmail.com",
             to: email,
             subject: "Room Booking Request",
-            html:htmlContent,
+            html: htmlContent,
         };
 
         // Send mail
@@ -128,29 +195,29 @@ const requestMail = async (req, res) => {
 
 
 const userReviews = async (req, res) => {
-    try{
-        const {name, feedback} = req.body;
-        if(!name || !feedback){
+    try {
+        const { name, feedback } = req.body;
+        if (!name || !feedback) {
             return res.status(400).json({ message: "Please fill all the fields" })
         }
 
-        const reviews = await reviewModel.create({name, feedback});
+        const reviews = await reviewModel.create({ name, feedback });
 
         return res.status(200).json({ message: "Review added successfully" });
 
-    }  catch (error) {
+    } catch (error) {
         return res.status(400).json({ message: "Error in requestMail", error: error.message });
     }
 }
 
 const getReviews = async (req, res) => {
-    try{
+    try {
         const reviews = await reviewModel.find({});
         console.log(reviews)
 
-        return res.status(200).json({reviews, message: "Success" });
+        return res.status(200).json({ reviews, message: "Success" });
 
-    }  catch (error) {
+    } catch (error) {
         return res.status(400).json({ message: "Error in requestMail", error: error.message });
     }
 }
@@ -160,4 +227,4 @@ const getReviews = async (req, res) => {
 
 
 
-export { addRooms, getRooms, deleteRoomById, getRoomsById,requestMail,userReviews,getReviews };
+export {getAllInquiries, createInquiry, addRooms, getRooms, deleteRoomById, getRoomsById, requestMail, userReviews, getReviews };
