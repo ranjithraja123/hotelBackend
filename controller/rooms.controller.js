@@ -28,7 +28,6 @@ const addRooms = async (req, res) => {
             images = req.files.map((file) => (file.path));
         }
 
-        console.log(images,"imagesimages")
 
         const newRooms = new roomsModel({
             roomType: roomtype,
