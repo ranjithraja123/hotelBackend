@@ -15,19 +15,26 @@ const addRooms = async (req, res) => {
         if (!roomtype || !amenities || !members) {
             return res.status(400).json({ message: "Please fill in all fields." })
         }
-        let filepaths = []
-        if (req.files) {
+        // let filepaths = []
+        // if (req.files) {
 
-            let sourceFiles = req.files
-            filepaths = sourceFiles.map((file) => path.relative('E:/Hotel/Uploads', file.path));
+        //     let sourceFiles = req.files
+        //     filepaths = sourceFiles.map((file) => path.relative('E:/Hotel/Uploads', file.path));
+        // }
+
+        let images = [];
+
+        if (req.files && req.files.length > 0) {
+            images = req.files.map((file) => (file.path));
         }
 
-        console.log(filepaths, "FP")
+        console.log(images,"imagesimages")
+
         const newRooms = new roomsModel({
             roomType: roomtype,
             amenities: amenities,
             members: members,
-            filepaths: filepaths,
+            filepaths: images,
             availabilities: availablities,
             areaInSqft: areaInSqft,
             itemsProvided: itemsprovided
@@ -88,21 +95,21 @@ const createInquiry = async (req, res) => {
 
 
 const getAllInquiries = async (req, res) => {
-  try {
-    const inquiries = await inquiryModel.find().sort({ createdAt: -1 });
+    try {
+        const inquiries = await inquiryModel.find().sort({ createdAt: -1 });
 
-    res.status(200).json({
-      success: true,
-      count: inquiries.length,
-      data: inquiries,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
-  }
+        res.status(200).json({
+            success: true,
+            count: inquiries.length,
+            data: inquiries,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
 };
 
 
@@ -227,4 +234,4 @@ const getReviews = async (req, res) => {
 
 
 
-export {getAllInquiries, createInquiry, addRooms, getRooms, deleteRoomById, getRoomsById, requestMail, userReviews, getReviews };
+export { getAllInquiries, createInquiry, addRooms, getRooms, deleteRoomById, getRoomsById, requestMail, userReviews, getReviews };

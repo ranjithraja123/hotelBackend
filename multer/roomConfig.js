@@ -1,57 +1,53 @@
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
-import dotenv from 'dotenv';
-import express from 'express';
+import multer from "multer";
+import dotenv from "dotenv";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import cloudinary from "../utils/cloudinary.js"; // FIX PATH
+
 dotenv.config();
-const app = express();
 
-// Ensure the environment variable is set or use a default fallback
-const uploadsDir = path.join(`${process.env.ROOM_PATH}`);
-app.use('uploads',express.static(uploadsDir))
-console.log(uploadsDir,"uploads")
-
-// Create the uploads directory if it does not exist
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// Configure Multer storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    // Ensure qcId is defined before usage
-    const qcId = req.qcId || 'defaultId';
-    cb(null, `${file.originalname}-${Date.now()}${path.extname(file.originalname)}`);
-  },
+/**
+ * Cloudinary Storage Configuration
+ */
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => ({
+    folder: "rooms",
+    resource_type: "image", // ✅ FIXED TYPO
+    allowed_formats: ["jpg", "png", "jpeg", "gif"],
+    public_id: `${file.originalname.split(".")[0]}-${Date.now()}`,
+  }),
 });
 
-// File filter to allow only images
+/**
+ * Allow only image files
+ */
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Only images are allowed'), false);
+    cb(new Error("Only image files are allowed"), false);
   }
 };
 
-// Configure Multer
+/**
+ * Multer Configuration
+ */
 const uploadRooms = multer({
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: { fileSize: 1024 * 1024 * 25 }, // 25MB limit
+  storage,
+  fileFilter,
+  limits: { fileSize: 1024 * 1024 * 25 }, // 25MB
 });
 
-// Middleware to handle multiple file uploads
+/**
+ * Middleware for multiple uploads
+ */
 const uploadMultipleRooms = (req, res, next) => {
   uploadRooms.any()(req, res, (err) => {
     if (err instanceof multer.MulterError) {
       return res.status(400).json({ error: err.message });
     } else if (err) {
-      return res.status(500).json({ error: err.message });
+      return res.status(400).json({ error: err.message });
     }
     next();
   });
